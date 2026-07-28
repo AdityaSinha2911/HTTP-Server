@@ -34,7 +34,7 @@ int main(){
 
     
     if (bind(listenSocket,(sockaddr*)&serverAddr,sizeof(serverAddr)) == -1){
-        cerr<<"Not binded"<<endl;
+        cerr << "Bind failed: " << strerror(errno) << endl;
         return -1;
     }else{
         cout<<"Binding Succesfull"<<endl;
@@ -55,6 +55,8 @@ int main(){
     sockaddr_in clientAddr{};
     socklen_t clientLen = sizeof(clientAddr);
 
+    // client socket declared
+
     int clientSocket = accept(listenSocket,(sockaddr*)&clientAddr,&clientLen);
 
     if(clientSocket == -1){
@@ -66,5 +68,39 @@ int main(){
 
     // endlessly waiting until client connect
 
+
+
+    // Buffer to store incoming data
+    char buffer[4096];
+
+    // Clear the buffer
+    memset(buffer, 0, sizeof(buffer));
+
+
+    // creating recving function to receive data
+    ssize_t bytesReceived = recv(
+        clientSocket,      // Connected socket
+        buffer,            // Buffer to store data
+        sizeof(buffer)-1,  // Maximum bytes to receive
+        0                  // No special flags
+        );
+    
+    if (bytesReceived > 0)
+    {
+        cout << "Received " << bytesReceived << " bytes\n";
+        cout << buffer << endl;
+    }
+    else if (bytesReceived == 0)
+    {
+        cout << "Client disconnected." << endl;
+    }
+    else
+    {
+        perror("recv");
+    }
+
+    close(clientSocket);
+    close(listenSocket);
+    
     return 0;
 }
