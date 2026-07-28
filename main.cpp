@@ -16,13 +16,13 @@ int main(){
 
     // server socket created
 
-    int serverSocket=socket(AF_INET,SOCK_STREAM,0);
+    int listenSocket=socket(AF_INET,SOCK_STREAM,0);
 
-    if(serverSocket==-1){
+    if(listenSocket==-1){
         cerr<<"Not listening";
         return -1;
     }else{
-        cout<<"Socket Created, socket FD: "<<serverSocket<<endl;
+        cout<<"Socket Created, socket FD: "<<listenSocket<<endl;
     };
 
     // sockaddr_in is a structure that stores an IPv4 address and a port number
@@ -33,14 +33,38 @@ int main(){
     serverAddr.sin_addr.s_addr = htonl(INADDR_ANY); //Accept connections on all network interfaces.
 
     
-    if (bind(serverSocket,(sockaddr*)&serverAddr,sizeof(serverAddr)) == -1){
+    if (bind(listenSocket,(sockaddr*)&serverAddr,sizeof(serverAddr)) == -1){
         cerr<<"Not binded"<<endl;
+        return -1;
     }else{
         cout<<"Binding Succesfull"<<endl;
     }
 
+    // listen 
+
+    if(listen(listenSocket,10)== -1){
+        cerr<<"Not listening"<<endl;
+        return -1;
+    }else{
+        cout<<"Listening"<<endl;
+    }
 
 
-    
+    // creating client address
+
+    sockaddr_in clientAddr{};
+    socklen_t clientLen = sizeof(clientAddr);
+
+    int clientSocket = accept(listenSocket,(sockaddr*)&clientAddr,&clientLen);
+
+    if(clientSocket == -1){
+        cerr<<"Client Not connected"<<endl;
+        return -1;
+    }else{
+        cout<<"Client connected"<<endl;
+    }
+
+    // endlessly waiting until client connect
+
     return 0;
 }
