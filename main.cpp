@@ -83,7 +83,7 @@ int main(){
         buffer,            // Buffer to store data
         sizeof(buffer)-1,  // Maximum bytes to receive
         0                  // No special flags
-        );
+    );
     
     if (bytesReceived > 0)
     {
@@ -97,6 +97,27 @@ int main(){
     else
     {
         perror("recv");
+    }
+
+    string body = "<h1>Hello from my HTTP Server!</h1>";
+
+    string response ="HTTP/1.1 200 OK\r\n""Content-Type: text/html\r\n" "Content-Length: " + to_string(body.length()) + "\r\n""\r\n" +body;
+    
+
+    ssize_t bytesSent = send(clientSocket,response.c_str(),response.length(),0);
+
+    
+    if (bytesSent > 0)
+    {
+        cout << "Sent "<< bytesSent<< " bytes." << endl;
+    }
+    else if (bytesSent == 0)
+    {
+        cout << "No bytes were sent." << endl;
+    }
+    else
+    {
+        perror("send");
     }
 
     close(clientSocket);
