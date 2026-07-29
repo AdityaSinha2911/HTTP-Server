@@ -1,0 +1,3 @@
+## About
+
+An HTTP server is software that listens for client requests over the HTTP protocol, processes them, and sends appropriate responses. This project is a **C++ HTTP server built completely from scratch** using low-level POSIX socket programming on Linux to understand how web servers work internally. **Current progress:** implemented TCP socket creation, binding to a port, listening for incoming connections, accepting a client, receiving raw data using `recv()`, displaying the received bytes, handling client disconnection, and performing proper socket cleanup. Future phases will focus on parsing HTTP requests and generating valid HTTP responses.
