@@ -10,6 +10,8 @@
 #include <cerrno>
 #include <cstring>
 
+#include "parser/HttpParser.h"
+
 using namespace std;
 
 int main(){
@@ -88,7 +90,30 @@ int main(){
     if (bytesReceived > 0)
     {
         cout << "Received " << bytesReceived << " bytes\n";
-        cout << buffer << endl;
+
+        // Parse HTTP Request
+        HttpParser parser;
+
+        HttpRequest request = parser.parse(buffer);
+
+        cout << "\n========== Parsed Request ==========\n";
+
+        cout << "Method  : " << request.method << endl;
+        cout << "Path    : " << request.path << endl;
+        cout << "Version : " << request.version << endl;
+
+        cout << "\nHeaders\n";
+        cout << "----------------------\n";
+
+        for (const auto& header : request.headers)
+        {
+            cout << header.first
+                << " : "
+                << header.second
+                << endl;
+        }
+
+        cout << "====================================\n";
     }
     else if (bytesReceived == 0)
     {
@@ -103,10 +128,11 @@ int main(){
 
     string response ="HTTP/1.1 200 OK\r\n""Content-Type: text/html\r\n" "Content-Length: " + to_string(body.length()) + "\r\n""\r\n" +body;
     
-
+    // send 
+    
     ssize_t bytesSent = send(clientSocket,response.c_str(),response.length(),0);
 
-    
+
     if (bytesSent > 0)
     {
         cout << "Sent "<< bytesSent<< " bytes." << endl;
