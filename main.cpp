@@ -11,6 +11,8 @@
 #include <cstring>
 
 #include "parser/HttpParser.h"
+#include "router/Router.h"
+#include "response/ResponseBuilder.h"
 
 using namespace std;
 
@@ -91,29 +93,25 @@ int main(){
     {
         cout << "Received " << bytesReceived << " bytes\n";
 
-        // Parse HTTP Request
+        // Parse Request
         HttpParser parser;
-
         HttpRequest request = parser.parse(buffer);
 
-        cout << "\n========== Parsed Request ==========\n";
+        // Route Request
+        Router router;
+        HttpResponse response = router.route(request);
 
-        cout << "Method  : " << request.method << endl;
-        cout << "Path    : " << request.path << endl;
-        cout << "Version : " << request.version << endl;
+        // Build HTTP Response
+        ResponseBuilder builder;
+        string httpResponse = builder.build(response);
 
-        cout << "\nHeaders\n";
-        cout << "----------------------\n";
+        // Send Response
+        ssize_t bytesSent = send(clientSocket,httpResponse.c_str(),httpResponse.length(),0);
 
-        for (const auto& header : request.headers)
+        if (bytesSent == -1)
         {
-            cout << header.first
-                << " : "
-                << header.second
-                << endl;
+            perror("send");
         }
-
-        cout << "====================================\n";
     }
     else if (bytesReceived == 0)
     {
@@ -122,28 +120,6 @@ int main(){
     else
     {
         perror("recv");
-    }
-
-    string body = "<h1>Hello from my HTTP Server!</h1>";
-
-    string response ="HTTP/1.1 200 OK\r\n""Content-Type: text/html\r\n" "Content-Length: " + to_string(body.length()) + "\r\n""\r\n" +body;
-    
-    // send 
-    
-    ssize_t bytesSent = send(clientSocket,response.c_str(),response.length(),0);
-
-
-    if (bytesSent > 0)
-    {
-        cout << "Sent "<< bytesSent<< " bytes." << endl;
-    }
-    else if (bytesSent == 0)
-    {
-        cout << "No bytes were sent." << endl;
-    }
-    else
-    {
-        perror("send");
     }
 
     close(clientSocket);
