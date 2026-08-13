@@ -16,6 +16,12 @@
 *.gch
 *.pch
 main
+parser_test.cpp
+parser_test
+
+server
+router_test.cpp
+router_test
 # Libraries
 *.lib
 *.a
