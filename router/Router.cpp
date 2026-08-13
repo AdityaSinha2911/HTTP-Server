@@ -1,5 +1,6 @@
 #include "Router.h"
 #include "../file/FileReader.h"
+#include "../utils/MimeTypes.h"
 
 HttpResponse Router::route(const HttpRequest& request)
 {
@@ -37,8 +38,7 @@ HttpResponse Router::route(const HttpRequest& request)
     // File successfully read
     response.statusCode = 200;
     response.statusMessage = "OK";
-    response.headers["Content-Type"] = "text/html";
-
+    response.headers["Content-Type"] = MimeTypes::getType(filePath);
     response.body = content;
 
     return response;
