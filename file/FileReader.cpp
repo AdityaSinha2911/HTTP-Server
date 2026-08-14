@@ -3,21 +3,23 @@
 #include <fstream>
 #include <iterator>
 
-std::string FileReader::read(const std::string& filePath)
+std::optional<std::string>
+FileReader::read(const std::string& filePath)
 {
-    std::ifstream file(filePath);
+    std::ifstream file(
+        filePath,
+        std::ios::binary
+    );
 
     if (!file.is_open())
     {
-        return "";
+        return std::nullopt;
     }
 
     std::string content(
         (std::istreambuf_iterator<char>(file)),
         std::istreambuf_iterator<char>()
     );
-
-    file.close();
 
     return content;
 }
