@@ -1,6 +1,7 @@
 #include "Router.h"
 #include "../file/FileReader.h"
 #include "../utils/MimeTypes.h"
+#include <optional>
 
 HttpResponse Router::route(const HttpRequest& request)
 {
@@ -8,7 +9,6 @@ HttpResponse Router::route(const HttpRequest& request)
 
     FileReader reader;
 
-    // Decide which file should be served
     std::string filePath;
 
     if (request.path == "/")
@@ -20,26 +20,38 @@ HttpResponse Router::route(const HttpRequest& request)
         filePath = "public" + request.path;
     }
 
-    // Read requested file
-    std::string content = reader.read(filePath);
+    std::optional<std::string> content =
+        reader.read(filePath);
 
-    // File could not be read
-    if (content.empty())
+    // File not found
+    if (!content)
     {
         response.statusCode = 404;
         response.statusMessage = "Not Found";
-        response.headers["Content-Type"] = "text/html";
 
-        response.body = "<h1>404 Not Found</h1>";
+        response.headers["Content-Type"] = "text/html";
+        
+        // 404 error handling
+        response.body =
+            "<html>"
+            "<head><title>404 Not Found</title></head>"
+            "<body>"
+            "<h1>404 Not Found</h1>"
+            "<p>The requested resource was not found.</p>"
+            "</body>"
+            "</html>";
 
         return response;
     }
 
-    // File successfully read
+    // File found
     response.statusCode = 200;
     response.statusMessage = "OK";
-    response.headers["Content-Type"] = MimeTypes::getType(filePath);
-    response.body = content;
+
+    response.headers["Content-Type"] =
+        MimeTypes::getType(filePath);
+
+    response.body = *content;
 
     return response;
 }
