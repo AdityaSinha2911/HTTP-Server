@@ -2,6 +2,7 @@
 #include "../file/FileReader.h"
 #include "../utils/MimeTypes.h"
 #include <optional>
+#include "../utils/PathUtils.h"
 
 HttpResponse Router::route(const HttpRequest& request)
 {
@@ -9,6 +10,27 @@ HttpResponse Router::route(const HttpRequest& request)
 
     FileReader reader;
 
+
+    // Security check
+    if (!PathUtils::isSafePath(request.path))
+    {
+        response.statusCode = 403;
+        response.statusMessage = "Forbidden";
+
+        response.headers["Content-Type"] = "text/html";
+
+        response.body =
+            "<html>"
+            "<head><title>403 Forbidden</title></head>"
+            "<body>"
+            "<h1>403 Forbidden</h1>"
+            "<p>Access to this path is forbidden.</p>"
+            "</body>"
+            "</html>";
+
+        return response;
+    }
+    
     std::string filePath;
 
     if (request.path == "/")
