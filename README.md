@@ -6,8 +6,7 @@ The goal of this project is to build an **HTTP/1.1 web server completely from sc
 
 The project focuses on understanding how web servers work internally — from low-level TCP socket communication to HTTP request parsing, routing, static file serving, MIME type detection, security, and HTTP response generation.
 
-> **Project Status:** In Progress
-> This repository documents my journey of building a functional HTTP server step by step.
+
 
 ---
 
