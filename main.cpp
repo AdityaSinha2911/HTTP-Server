@@ -36,7 +36,7 @@ int main(){
     serverAddr.sin_port = htons(8081);
     serverAddr.sin_addr.s_addr = htonl(INADDR_ANY); //Accept connections on all network interfaces.
 
-    
+    // bind socket 
     if (bind(listenSocket,(sockaddr*)&serverAddr,sizeof(serverAddr)) == -1){
         cerr << "Bind failed: " << strerror(errno) << endl;
         return -1;
@@ -53,76 +53,79 @@ int main(){
         cout<<"Listening"<<endl;
     }
 
-
-    // creating client address
-
-    sockaddr_in clientAddr{};
-    socklen_t clientLen = sizeof(clientAddr);
-
-    // client socket declared
-
-    int clientSocket = accept(listenSocket,(sockaddr*)&clientAddr,&clientLen);
-
-    if(clientSocket == -1){
-        cerr<<"Client Not connected"<<endl;
-        return -1;
-    }else{
-        cout<<"Client connected"<<endl;
-    }
-
-    // endlessly waiting until client connect
-
-
-
-    // Buffer to store incoming data
-    char buffer[4096];
-
-    // Clear the buffer
-    memset(buffer, 0, sizeof(buffer));
-
-
-    // creating recving function to receive data
-    ssize_t bytesReceived = recv(
-        clientSocket,      // Connected socket
-        buffer,            // Buffer to store data
-        sizeof(buffer)-1,  // Maximum bytes to receive
-        0                  // No special flags
-    );
     
-    if (bytesReceived > 0)
-    {
-        cout << "Received " << bytesReceived << " bytes\n";
+    while(true){ //to handle the request till client wants
 
-        // Parse Request
-        HttpParser parser;
-        HttpRequest request = parser.parse(buffer);
+        // creating client address
+        sockaddr_in clientAddr{};
+        socklen_t clientLen = sizeof(clientAddr);
 
-        // Route Request
-        Router router;
-        HttpResponse response = router.route(request);
+        // client socket declared
 
-        // Build HTTP Response
-        ResponseBuilder builder;
-        string httpResponse = builder.build(response);
+        int clientSocket = accept(listenSocket,(sockaddr*)&clientAddr,&clientLen);
 
-        // Send Response
-        ssize_t bytesSent = send(clientSocket,httpResponse.c_str(),httpResponse.length(),0);
-
-        if (bytesSent == -1)
-        {
-            perror("send");
+        if(clientSocket == -1){
+            cerr<<"Client Not connected"<<endl;
+            return -1;
+        }else{
+            cout<<"Client connected"<<endl;
         }
-    }
-    else if (bytesReceived == 0)
-    {
-        cout << "Client disconnected." << endl;
-    }
-    else
-    {
-        perror("recv");
-    }
 
-    close(clientSocket);
+        // endlessly waiting until client connect
+
+
+
+        // Buffer to store incoming data
+        char buffer[4096];
+
+        // Clear the buffer
+        memset(buffer, 0, sizeof(buffer));
+
+
+        // creating recving function to receive data
+        ssize_t bytesReceived = recv(
+            clientSocket,      // Connected socket
+            buffer,            // Buffer to store data
+            sizeof(buffer)-1,  // Maximum bytes to receive
+            0                  // No special flags
+        );
+        
+        if (bytesReceived > 0)
+        {
+            cout << "Received " << bytesReceived << " bytes\n";
+
+            // Parse Request
+            HttpParser parser;
+            HttpRequest request = parser.parse(buffer);
+
+            // Route Request
+            Router router;
+            HttpResponse response = router.route(request);
+
+            // Build HTTP Response
+            ResponseBuilder builder;
+            string httpResponse = builder.build(response);
+
+            // Send Response
+            ssize_t bytesSent = send(clientSocket,httpResponse.c_str(),httpResponse.length(),0);
+
+            if (bytesSent == -1)
+            {
+                perror("send");
+            }
+        }
+        else if (bytesReceived == 0)
+        {
+            cout << "Client disconnected." << endl;
+        }
+        else
+        {
+            perror("recv");
+        }
+
+        close(clientSocket);
+    }
+    
     close(listenSocket);
     
     return 0;
